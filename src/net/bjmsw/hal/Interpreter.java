@@ -12,8 +12,6 @@ public class Interpreter {
         int programmCounter = 0;
 
 
-
-
     }
 
 }
