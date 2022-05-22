@@ -11,7 +11,7 @@ public class FileManager {
     File programFile;
     InputStream is;
     BufferedReader reader;
-    List<Instruction> instructions;
+    final List<Instruction> instructions;
     int instructionsCount = 0;
 
 
@@ -34,7 +34,7 @@ public class FileManager {
         }
     }
 
-    public Instruction getInstruction(int number) {
+    public Instruction getInstruction(Integer number) {
         return instructions.get(number);
     }
 

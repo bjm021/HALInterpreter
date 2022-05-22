@@ -2,13 +2,13 @@ package net.bjmsw.hal.model;
 
 public class Register {
 
-    int value;
+    float value = 0;
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(float value) {
         this.value = value;
     }
 }
