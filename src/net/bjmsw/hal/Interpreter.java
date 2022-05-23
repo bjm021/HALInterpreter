@@ -4,6 +4,7 @@ import net.bjmsw.hal.io.FileManager;
 import net.bjmsw.hal.model.Instruction;
 import net.bjmsw.hal.model.InstructionType;
 import net.bjmsw.hal.model.RAM;
+import net.bjmsw.hal.model.Register;
 
 import java.time.LocalTime;
 
@@ -31,6 +32,9 @@ public class Interpreter {
                 DEBUG = true;
             }
             programFileArgument = args[1];
+        } else {
+            System.err.println("Unknown argument configuration. Usage: HALInterpreter [-d --debug] file/path.txt");
+            System.exit(0);
         }
 
 
@@ -45,9 +49,13 @@ public class Interpreter {
         while (true) {
             Instruction i = manager.getInstruction(ram.read(PC_ADDRESS).intValue()); // Get instruction
             ram.write(PC_ADDRESS, ram.read(PC_ADDRESS) + 1); // PC = PC + 1
+            if (i == null) {
+                if (DEBUG) System.out.println("[DEBUG] Line " + (ram.read(PC_ADDRESS)-1) + " not found, skipping!");
+                continue;
+            }
             try {
                 InstructionType type = InstructionType.valueOf(i.getName());
-                //if (DEBUG) System.out.println("Executing: " + type + " with argument " + i.getOperand() + " acc at: " + ram.read(ACCU_ADDRESS));
+                if (DEBUG) debugOutput(i);
                 InstructionType.runInstruction(type, i.getOperand(), ram);
             } catch (IllegalArgumentException e) {
                 System.err.println("Invalid instruction: " + i.getName());
@@ -55,6 +63,14 @@ public class Interpreter {
             }
         }
 
+
+    }
+
+
+    private static void debugOutput(Instruction i) {
+        System.out.print("[DEBUG]: Executing " + i.getName() + " ");
+        if (i.hasOperand()) System.out.println("with operand " + i.getOperand());
+        else System.out.println();
 
     }
 

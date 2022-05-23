@@ -4,25 +4,31 @@ import net.bjmsw.hal.model.Instruction;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileManager {
 
     File programFile;
     InputStream is;
     BufferedReader reader;
-    final List<Instruction> instructions;
+    final Map<Integer, Instruction> instructions;
     int instructionsCount = 0;
 
 
     public FileManager(String filePath) {
-        instructions = new ArrayList<>();
+        instructions = new HashMap<>();
         try {
             programFile = new File(filePath);
             is = new FileInputStream(programFile);
             reader = new BufferedReader(new InputStreamReader(is));
             while(reader.ready()) {
-                instructions.add(new Instruction(reader.readLine()));
+                //instructions.add(new Instruction(reader.readLine()));
+                String line = reader.readLine();
+                if (line.startsWith("//") || line.isEmpty()) continue;
+                Instruction i = new Instruction(line);
+                instructions.put(i.getLineNumber(), i);
                 instructionsCount++;
             }
         } catch (FileNotFoundException e) {
