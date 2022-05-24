@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HALInterpreter:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HALInterpreter_jar</output-path>
+    <root id="archive" name="HALInterpreter.jar">
+      <element id="module-output" name="HALInterpreter" />
+    </root>
+  </artifact>
+</component>

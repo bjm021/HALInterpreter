@@ -4,7 +4,6 @@ import net.bjmsw.hal.io.FileManager;
 import net.bjmsw.hal.model.Instruction;
 import net.bjmsw.hal.model.InstructionType;
 import net.bjmsw.hal.model.RAM;
-import net.bjmsw.hal.model.Register;
 
 import java.time.LocalTime;
 
@@ -55,10 +54,10 @@ public class Interpreter {
             }
             try {
                 InstructionType type = InstructionType.valueOf(i.getName());
-                if (DEBUG) debugOutput(i);
+                if (DEBUG) debugOutput(i, ram);
                 InstructionType.runInstruction(type, i.getOperand(), ram);
             } catch (IllegalArgumentException e) {
-                System.err.println("Invalid instruction: " + i.getName());
+                System.err.println("Invalid instruction: " + i.getName() + " at line " + i.getLineNumber());
                 System.exit(0);
             }
         }
@@ -67,9 +66,15 @@ public class Interpreter {
     }
 
 
-    private static void debugOutput(Instruction i) {
+    private static void debugOutput(Instruction i, RAM ram) {
         System.out.print("[DEBUG]: Executing " + i.getName() + " ");
-        if (i.hasOperand()) System.out.println("with operand " + i.getOperand());
+        if (i.hasOperand()) {
+            System.out.print("with operand " + i.getOperand());
+            if (!i.getName().equals("JUMP")) {
+                Float f = ram.read(i.getOperand().intValue());
+                if (f != null) System.out.println(" with value at [" + i.getOperand() + "] = " + f);
+            }
+        }
         else System.out.println();
 
     }

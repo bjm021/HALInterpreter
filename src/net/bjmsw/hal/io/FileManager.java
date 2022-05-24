@@ -28,6 +28,10 @@ public class FileManager {
                 String line = reader.readLine();
                 if (line.startsWith("//") || line.isEmpty()) continue;
                 Instruction i = new Instruction(line);
+                if (instructions.containsKey(i.getLineNumber())) {
+                    System.err.println("Line " + i.getLineNumber() + " duplicate in file!");
+                    System.exit(0);
+                }
                 instructions.put(i.getLineNumber(), i);
                 instructionsCount++;
             }
