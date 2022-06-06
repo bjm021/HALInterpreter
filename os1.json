@@ -1,0 +1,20 @@
+{
+  "hal": [
+    {
+      "id": "1",
+      "program-file": "./p1.txt"
+    },
+    {
+      "id": "2",
+      "program-file": "./p2.txt"
+    }
+  ],
+  "connections": [
+    {
+      "startID": "1",
+      "startPort": 3,
+      "destID": "2",
+      "destPort": 2
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import java.util.Scanner;
 public enum InstructionType {
     START(false),
     STOP(false),
-    IN, OUT, LOAD, LOADNUM, STORE, JUMPNEG, JUMPPOS, JUMPNULL, JUMP,
+    IN, OUT, SYSOUT, LOAD, LOADNUM, STORE, JUMPNEG, JUMPPOS, JUMPNULL, JUMP,
     ADD, ADDNUM, SUB, SUBNUM, MUL, MULNUM, DIV, DIVNUM,
     LOADIND, STOREIND;
 
@@ -25,7 +25,7 @@ public enum InstructionType {
         this.hasOperand = true;
     }
 
-    public static void runInstruction(InstructionType type, Float operand, RAM ram) {
+    public static void runInstruction(InstructionType type, Float operand, RAM ram, HALThread runningFrom) {
 
         boolean debug = Interpreter.DEBUG;
         int acc = Interpreter.ACC_ADDRESS;
@@ -40,7 +40,7 @@ public enum InstructionType {
                 if (debug) System.out.println("Stopping programm");
                 LocalTime endDate = LocalTime.now();
 
-                Duration diff = Duration.between(Interpreter.startDate, endDate);
+                Duration diff = Duration.between(runningFrom.getHalInterpreter().getStartDate(), endDate);
                 long tmp = diff.toSeconds();
 
                 long h = tmp / 3600;
@@ -57,18 +57,27 @@ public enum InstructionType {
             }
 
             case IN -> {
-                Scanner s = new Scanner(System.in);
-                System.out.print("Awaiting user input: ");
-                try {
-                    float input = s.nextFloat();
-                    ram.write(acc, input);
-                } catch (InputMismatchException e) {
-                    System.err.println("The given input is illegal! Please only input numbers!");
-                    System.exit(0);
+                if (operand == null) { // Backwards compatability
+                    Scanner s = new Scanner(System.in);
+                    System.out.print("Awaiting user input: ");
+                    try {
+                        float input = s.nextFloat();
+                        ram.write(acc, input);
+                    } catch (InputMismatchException e) {
+                        System.err.println("The given input is illegal! Please only input numbers!");
+                        System.exit(0);
+                    }
+                    return;
                 }
+                ram.write(acc, runningFrom.getRBuffer(operand.intValue()).get());
             }
 
-            case OUT -> System.out.println("Output: " + ram.read(acc));
+            case OUT -> {
+                if (operand == null) { System.out.println("Output: " + ram.read(acc)); return; } // Backwards compatability
+                runningFrom.getSBuffer(operand.intValue()).put(ram.read(acc));
+            }
+
+            case SYSOUT -> System.out.println("Output: " + ram.read(acc));
 
             case LOAD -> ram.write(acc, ram.read(operand.intValue()));
 
