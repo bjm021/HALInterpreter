@@ -1,0 +1,7 @@
+HAL-Prozessoren:
+    1 ./p1.txt 1
+    2 ./p2.txt 2
+HAL-Verbindungen:
+    1:3 > 2:2
+    STDIN > 1:0
+    2:3 > STDOUT
