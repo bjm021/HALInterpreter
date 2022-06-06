@@ -126,6 +126,16 @@ public class halOS {
         connections.forEach(o -> {
             JSONObject conn = (JSONObject) o;
 
+            if (conn.getString("startID").equalsIgnoreCase("STDIN")) {
+                threads.get(conn.getString("destID")).addRBuffer(conn.getInt("destPort"), new ConsoleBuffer());
+                return;
+            }
+
+            if (conn.getString("destID").equalsIgnoreCase("STDOUT")) {
+                threads.get(conn.getString("startID")).addSBuffer(conn.getInt("startPort"), new ConsoleBuffer());
+                return;
+            }
+
             // Create Buffer
             Buffer b = new Buffer();
 

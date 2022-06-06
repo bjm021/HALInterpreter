@@ -15,6 +15,16 @@
       "startPort": 3,
       "destID": "2",
       "destPort": 2
+    },
+    {
+      "startID": "STDIN",
+      "destID": "1",
+      "destPort": 0
+    },
+    {
+      "startID": "2",
+      "startPort": 3,
+      "destID": "STDOUT"
     }
   ]
 }
