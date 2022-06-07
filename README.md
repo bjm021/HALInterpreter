@@ -65,8 +65,8 @@ Note that we only have one accumulator to work with so we need to store the firs
 | ----------- | ----------- | ------------------- |
 | START       |             | Starts the program  |
 | STOP        |             | Stops the program   |
-| IN          |             | Reads from the command line into the accumulator |
-| OUT         |             | Print to the command line |
+| IN          | p           | Reads from the I/O Buffer on port p (Leave empty to read from STDIN / user prompt) |
+| OUT         | p           | Writes to the I/O Buffer on port p (Leave empty to write on STDOUT) |
 | LOAD        | r           | Loads the contents of register r into the accumulator |
 | LOADNUM     | c           | Loads the constant k into the accumulator |
 | STORE       | r           | Stores the content of the accumulator to register r |
@@ -84,3 +84,50 @@ Note that we only have one accumulator to work with so we need to store the firs
 | DIVNUM      | c           | Divides the accumulator by the constant c |
 | LOADIND     | r           | Loads the register to which the contents of register r points (load indirect, ACC = [[r]]) into the accumulator |
 | STOREIND    | r           | Stores the accumulator to the register to which the content of register r points to (store indirect) [[r]] = ACC |
+
+<hr>
+
+# HAL OS
+Create networks of multiple interconnected HAL Interpreters.
+
+You can run the halOS class with an OS Config file to created multiple HAL interpreters thet run simultaneously.
+
+## Config file format 
+
+```json
+{
+  "hal": [
+    {
+      "id": "1",
+      "program-file": "./p1.txt"
+    },
+    {
+      "id": "2",
+      "program-file": "./p2.txt"
+    }
+  ],
+  "connections": [
+    {
+      "startID": "1",
+      "startPort": 3,
+      "destID": "2",
+      "destPort": 2
+    },
+    {
+      "startID": "STDIN",
+      "destID": "1",
+      "destPort": 0
+    },
+    {
+      "startID": "2",
+      "startPort": 3,
+      "destID": "STDOUT"
+    }
+  ]
+}
+```
+
+The ```hal``` section describes how many interpreters exist in the network and what program they should run. The ```connections``` section describers the I/O buffers of each interpreter. <br>
+The first connection in the example above causes hal interpreter 1 to have an I/O buffer on port 3 that can be written to and hal interpreter 2 to have that I/O buffer on port 2 to read from (these buffers are directional). In hal code this connection could be used as ```OUT 3``` on hal 1 and ```IN 2``` on hal 2. <br>
+If a hal interpreter reads from an I/O Buffer that has not been written to it waits until the sending interpreter sends a value to the I/O buffer.<br>
+You can use ```STDIN``` as a connection ```startID``` to prompt the user for a console input and ```STDOUT``` as a ```destID``` to write to the console.
