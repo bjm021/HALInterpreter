@@ -42,7 +42,7 @@ public class halOS {
         File file = new File(filePath);
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            int lastHalId = 1;
+            List<Integer> existingIDs = new ArrayList<>();
             String line;
             int fileStep = 0;
             System.out.println("Found file. parsing...");
@@ -58,21 +58,24 @@ public class halOS {
                     fileStep = 2;
                     continue;
                 }
-                if (fileStep == 1 && !line.isEmpty() && line.startsWith(String.valueOf(lastHalId))) {
-                    System.out.println("Creating HAL Interpreter: " + lastHalId + " with path: " + line.substring(1, line.length()-1));
-                    HALThread t = new HALThread(String.valueOf("lastHalId"), line.substring(1, line.length()-1));
-                    threads.put(String.valueOf(lastHalId), t);
-                    lastHalId++;
+                if (fileStep == 1 && !line.isEmpty()) {
+                    int halID = Integer.parseInt(line.substring(0, 1));
+                    if (existingIDs.contains(halID)) {
+                        System.err.println("HAL ID " + halID + " already exists!");
+                        System.exit(0);
+                    }
+                    HALThread t = new HALThread(String.valueOf("lastHalId"), line.substring(1, line.length()));
+                    threads.put(String.valueOf(halID), t);
+                    existingIDs.add(halID);
                 }
                 if (fileStep == 2 && !line.isEmpty()) {
-                    System.out.println(line);
                     String[] sp = line.split(">");
                     String[] start = sp[0].split(":");
                     String[] dest = sp[1].split(":");
 
                     // STDIN Buffer support
                     if (sp[0].equalsIgnoreCase("STDIN")) {
-                        if (Integer.parseInt(dest[0])+1 > lastHalId) {
+                        if (!existingIDs.contains(Integer.parseInt(dest[0]))) {
                             System.err.println("The Config files connection section contains HAL IDs that doesn't exist.");
                             System.exit(0);
                         }
@@ -82,7 +85,7 @@ public class halOS {
 
                     // STDOUT Buffer support
                     if (sp[1].equalsIgnoreCase("STDOUT")) {
-                        if (Integer.parseInt(start[0])+1 > lastHalId) {
+                        if (!existingIDs.contains(Integer.parseInt(start[0]))) {
                             System.err.println("The Config files connection section contains HAL IDs that doesn't exist.");
                             System.exit(0);
                         }
@@ -91,7 +94,7 @@ public class halOS {
                     }
 
                     // check for illegal IDs
-                    if (Integer.parseInt(start[0])+1 > lastHalId || Integer.parseInt(dest[0])+1 > lastHalId) {
+                    if (!existingIDs.contains(Integer.parseInt(start[0])) || !existingIDs.contains(Integer.parseInt(start[0]))) {
                         System.err.println("The Config files connection section contains HAL IDs that doesn't exist.");
                         System.exit(0);
                     }
@@ -105,6 +108,7 @@ public class halOS {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NumberFormatException e) {
+            e.printStackTrace();
             System.err.println("Config file malformed!");
         }
 
@@ -142,10 +146,6 @@ public class halOS {
             // Add to corresponding idsw
             threads.get(conn.getString("startID")).addSBuffer(conn.getInt("startPort"), b);
             threads.get(conn.getString("destID")).addRBuffer(conn.getInt("destPort"), b);
-
         });
-
-
     }
-
 }
